@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Skin Cancer Checker</title>
+  <style>
+    body {
+      background-color: #f8f9fa; /* Light gray background color */
+      font-family: 'Arial', sans-serif;
+    }
+
+    .container {
+      margin-top: 50px;
+      background-color: #ffffff; /* White container background color */
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Box shadow for container */
+    }
+
+    .jumbotron {
+      background-color: #007bff; /* Bootstrap primary color for jumbotron header */
+      color: #ffffff; /* White text color for jumbotron header */
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .custom-file-label::after {
+      content: "Choose File";
+    }
+
+    .btn-primary {
+      background-color: #007bff; /* Bootstrap primary color for buttons */
+      border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3; /* Darker shade on hover */
+    }
+
+    #resultContainer {
+      margin-top: 30px;
+    }
+
+    #predictionResult {
+      font-size: 18px;
+      margin-top: 15px;
+    }
+
+    #uploadedImage {
+      max-width: 100%;
+      height: auto;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="jumbotron text-center">
+      <h1 class="display-4">Skin Cancer Checker</h1>
+      <p class="lead">Upload your skin images to check for potential signs of skin cancer.</p>
+    </div>
+
+    <form action="/predict" method="post" enctype="multipart/form-data" id="uploadForm">
+      <div class="custom-file mb-3">
+        <input type="file" class="custom-file-input" id="skinImage" name="file" accept="image/*" required>
+        <label class="custom-file-label" for="skinImage"></label>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Check for Skin Cancer</button>
+    </form>
+
+    <div class="mt-4" id="resultContainer" style="display: none;">
+      <h2>Results</h2>
+      <p id="predictionResult"></p>
+      <img id="uploadedImage" src="" alt="Uploaded Image">
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      var fileInput = document.getElementById('skinImage');
+      var resultContainer = document.getElementById('resultContainer');
+      var predictionResult = document.getElementById('predictionResult');
+      var uploadedImage = document.getElementById('uploadedImage');
+
+      var formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      fetch('/predict', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        resultContainer.style.display = 'block';
+        predictionResult.textContent = data;
+
+        if(data=='Benign'){
+          window.location.href='/benign';
+        } else if(data=='Malignant'){
+          window.location.href='/malignant';
+        }
+
+        // Display the uploaded image
+        uploadedImage.src = URL.createObjectURL(fileInput.files[0]);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+  </script>
+</body>
+</html>
